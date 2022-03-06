@@ -11,6 +11,19 @@ from time import sleep
 
 link = "https://www.auto-data.net/en/allbrands"
 
+def get_lst_brands():
+    
+    browser = webdriver.Safari()
+    browser.get(link)
+    
+    brands_lst = []
+    brands_lst = browser.find_elements_by_class_name('marki_blok')
+    for brand_elem in brands_lst:
+        brand_name_elem = brand_elem.find_element_by_tag_name('strong').text
+        brands_lst.append(brand_name_elem)
+
+    return brands_lst, browser
+
 def get_brand(browser, brand_name):
     
     wait = WebDriverWait(browser,1)
@@ -65,7 +78,9 @@ def get_sub_models(browser, models):
 
     return sub_model_dict
 
-def write_sub_model(sub_model_dict, brand_name):
+
+def get_submodels_df(sub_model_dict):
+    
     header = ['Model','Sub_model', 'Sub_model_href', 'Sub_model_scr', 'sub_model_description']
 
     info_submodel = []
@@ -74,12 +89,16 @@ def write_sub_model(sub_model_dict, brand_name):
 
 
     sub_model_df = pd.DataFrame(info_submodel, columns=header)
+    return sub_model_df
+
+def write_sub_model(sub_model_df, brand_name):
+
     file_name = "data/" + brand_name + "_submodels.xlsx"
     sub_model_df.to_excel(file_name, index = False)
 
 
-def scrape(brand_name):
-    browser = webdriver.Safari()
+def scrape(browser, brand_name):
+
 
     browser.get(link)
     cookies_xpath = "/html/body/div[1]/div[2]"
@@ -95,14 +114,16 @@ def scrape(brand_name):
     models = get_models(browser)
     sub_model_dict = get_sub_models(browser, models)
 
-    write_sub_model(sub_model_dict, brand_name)
+    sub_model_df = get_submodels_df(sub_model_dict)
+    
+    write_sub_model(sub_model_df, brand_name)
 
     print("Brand")
     print(brand_name)
     print("Nr models")
     print(len(models))
     print("Nr versions")
-    print(len(sub_model_dict))
+    print(sub_model_df.shape[0])
 
 
     wait = WebDriverWait(browser,4)

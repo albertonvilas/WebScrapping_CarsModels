@@ -1,10 +1,17 @@
-from scraper import scrape
+from scraper import scrape, get_lst_brands
 
+from random import randint
+from time import sleep
 
 def run_scrape():
-    scrape(brand_name)
+    
+    brands_lst, browser = get_lst_brands()
+
+    for brand_name in brands_lst:
+        scrape(brand_name, browser)
+        sleep(randint(0,2))
 
 
-brand_name = "FIAT"
+
 
 run_scrape()
